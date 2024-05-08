@@ -38,9 +38,7 @@ def _to_core_aten(
         )
     core_aten_ep = export(model, example_inputs, dynamic_shapes=dynamic_shapes, strict=False)
 
-    #core_aten_ep = export(model, example_inputs, dynamic_shapes=dynamic_shapes)
-    assert isinstance(model, torch.fx.GraphModule), "export doesn't work"
-    core_aten_ep = model
+    # core_aten_ep = export(model, example_inputs, dynamic_shapes=dynamic_shapes)
     if verbose:
         logging.info(f"Core ATen graph:\n{core_aten_ep.graph}")
     return core_aten_ep
