@@ -1,6 +1,7 @@
 
 from typing import List
 import torch
+import tempfile
 from executorch.extension.pybindings import portable_lib as exec_lib
 
 from executorch.backends.xnnpack.partition.xnnpack_partitioner import (
@@ -45,11 +46,14 @@ def executorch_compiler(gm: torch.fx.GraphModule, example_inputs: List[torch.Ten
         )
     )
 
-    with tempfile.NamedTemporaryFile(mode="w+b") as f:
+    with tempfile.NamedTemporaryFile(mode="w+b", delete=False) as f:
         export_program.write_to_file(f)
         filename = f.name
 
-    return exec_lib._load_for_executorch(str(path)).forward
+    loaded = exec_lib._load_for_executorch(str(filename))
+    def run(*args):
+        return loaded.forward(args)
+    return run
 
 @torch.compile(backend=executorch_compiler)
 def toy_example(a, b):
